@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  name         String    @db.VarChar(25)
+  email        String    @unique(map: "email") @db.VarChar(100)
+  password     String    @db.VarChar(255)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.DateTime(6)
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.DateTime(6)
+  refreshToken String?   @db.VarChar(500)
+  Drivings     Driving[]
+
+  @@map("user")
+}
+
+model Device {
+  id       Int       @id @default(autoincrement())
+  code     String    @unique(map: "code") @db.VarChar(100)
+  status   Int       @default(0) @db.Int
+  Drivings Driving[]
+
+  @@map("device")
+}
+
+model Driving {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id") @db.Int
+  user      User      @relation(fields: [userId], references: [id])
+  deviceId  Int       @map("device_id") @db.Int
+  device    Device    @relation(fields: [deviceId], references: [id])
+  headway   Int       @default(0) @db.Int
+  bias      Int       @default(0) @db.Int
+  mileage   Float     @default(0) @db.Float
+  startTime DateTime  @default(now()) @map("start_time") @db.DateTime(6)
+  endTime   DateTime? @map("end_time") @db.DateTime(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.DateTime(6)
+  Eyes      Eyes[]
+
+  @@map("driving")
+}
+
+model Eyes {
+  id        Int     @id @default(autoincrement())
+  drivingId Int     @map("driving_id") @db.Int
+  driving   Driving @relation(fields: [drivingId], references: [id])
+  left      Int     @db.Int
+  right     Int     @db.Int
+  front     Int     @db.Int
+
+  @@map("eyes")
+}
